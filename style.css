@@ -12,12 +12,16 @@ body {
 	margin-bottom: 20px;
 }
 
+.form-group #nome_produto{
+	width: 200px;
+}
+
 .form-group #perimetro{
-	width: 100px;
+	width: 80px;
 }
 
 .form-group #corte{
-	width: 100px;
+	width: 80px;
 }
 
 .checkbox {
