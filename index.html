@@ -73,7 +73,7 @@ function atualizarListaProdutos() {
         var produto = listaProdutos[i];
         listaProdutosHtml += "<li>" + produto.nomeProduto + " - Perímetro: " +
             produto.perimetro + " - Corte: " + produto.corte + " - Chagrim: " + (produto.chagrim ? "Sim" : "Não") +
-            " <a href='#' onclick='excluirProduto(" + i + ")'>x</a></li>";
+            " <a href='#' onclick='excluirProduto(" + i + ")'>x</a></li>";    
     }
 
     document.getElementById("lista_produtos").innerHTML = listaProdutosHtml;
