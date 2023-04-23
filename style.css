@@ -28,3 +28,49 @@ body {
 	margin-top: 20px;
 	margin-bottom: 20px;
 }
+
+.form-group input {
+    width: 100%;
+}
+
+body {
+    font-size: 16px;
+}
+
+@media screen and (max-width: 767px) {
+    body {
+        font-size: 14px;
+    }
+}
+
+h1 {
+    font-size: 2em;
+}
+
+@media screen and (max-width: 767px) {
+    h1 {
+        font-size: 1.5em;
+    }
+}
+
+p {
+    font-size: 1em;
+}
+
+@media screen and (max-width: 767px) {
+    p {
+        font-size: 0.8em;
+    }
+}
+
+#lista_produtos {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+@media screen and (max-width: 767px) {
+    #lista_produtos {
+        max-width: 300px;
+    }
+}
+
