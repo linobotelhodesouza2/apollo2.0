@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Formulário de Produto</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h1>Apollo</h1>
+                <form>
+                    <div class="form-group">
+                        <label for="nome_produto">Nome do Produto:</label>
+                        <input type="text" class="form-control" id="nome_produto" name="nome_produto" pattern="[A-Za-zÀ-ú ]+" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="perimetro">Perímetro:</label>
+                        <input type="number" step="0.01" class="form-control" id="perimetro" name="perimetro" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="corte">Corte:</label>
+                        <input type="number" step="0.01" class="form-control" id="corte" name="corte" required>
+                        <div class="checkbox">
+                        <label>
+                            <input type="checkbox" name="chagrim"> Chagrim
+                        </label>
+                    </div>
+                        <br>
+                        <button type="button" class="btn btn-primary" onclick="adicionar()">Adicionar</button>
+                        
+                    </div>
+                    
+                </form>
+            </div>
+            <div class="col-md-6">
+                <h2> </h2><!--informações sobre o perimetro corte e chagrim-->
+                <ul id="lista_produtos"></ul>
+            </div>
+        </div>
+    </div>
+
+<script>
+function adicionar() {
+    var nomeProduto = document.getElementById("nome_produto").value;
+    var perimetro = document.getElementById("perimetro").value;
+    var corte = document.getElementById("corte").value;
+    var chagrim = document.getElementsByName("chagrim")[0].checked;
+
+    var novoProduto = {
+        "nomeProduto": nomeProduto,
+        "perimetro": perimetro,
+        "corte": corte,
+        "chagrim": chagrim
+    };
+
+    var listaProdutos = JSON.parse(localStorage.getItem("listaProdutos")) || [];
+    listaProdutos.push(novoProduto);
+    localStorage.setItem("listaProdutos", JSON.stringify(listaProdutos));
+
+    atualizarListaProdutos();
+    limparCampos();
+}
+
+function atualizarListaProdutos() {
+    var listaProdutos = JSON.parse(localStorage.getItem("listaProdutos")) || [];
+    var listaProdutosHtml = "";
+
+    for (var i = 0; i < listaProdutos.length; i++) {
+        var produto = listaProdutos[i];
+        listaProdutosHtml += "<li>" + produto.nomeProduto + " - Perímetro: " +
+            produto.perimetro + " - Corte: " + produto.corte + " - Chagrim: " + (produto.chagrim ? "Sim" : "Não") +
+            " <a href='#' onclick='excluirProduto(" + i + ")'>x</a></li>";
+    }
+
+    document.getElementById("lista_produtos").innerHTML = listaProdutosHtml;
+}
+
+function limparCampos() {
+    document.getElementById("nome_produto").value = "";
+    document.getElementById("perimetro").value = "";
+    document.getElementById("corte").value = "";
+    document.getElementsByName("chagrim")[0].checked = false;
+}
+
+function excluirProduto(index) {
+    var listaProdutos = JSON.parse(localStorage.getItem("listaProdutos")) || [];
+    listaProdutos.splice(index, 1);
+    localStorage.setItem("listaProdutos", JSON.stringify(listaProdutos));
+    atualizarListaProdutos();
+}
+
+atualizarListaProdutos();
+</script>
+</body>
+</html>

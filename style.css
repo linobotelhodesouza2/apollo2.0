@@ -1,0 +1,26 @@
+body {
+	font-family: Arial, sans-serif;
+	background: rgba(0, 0, 0, 0.1);
+}
+
+.container {
+	max-width: auto;
+	margin: 0 auto;
+}
+
+.form-group {
+	margin-bottom: 20px;
+}
+
+.form-group #perimetro{
+	width: 100px;
+}
+
+.form-group #corte{
+	width: 100px;
+}
+
+.checkbox {
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
