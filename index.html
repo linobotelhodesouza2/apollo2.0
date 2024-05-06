@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perímetro e Corte</title>
+    <title>Perímetros e Cortes</title>
     <!-- Adicionando Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -143,9 +143,16 @@
         }
 
         function removerEntrada(index) {
+            const perimetroRemovido = dadosSalvos[index].perimetro;
             dadosSalvos.splice(index, 1);
             localStorage.setItem('dados', JSON.stringify(dadosSalvos));
             renderizarTabelaDados();
+            
+            // Verificar se o perímetro removido não possui mais dados associados
+            if (!dadosSalvos.some(dado => dado.perimetro === perimetroRemovido)) {
+                perimetrosSalvos.delete(perimetroRemovido);
+                renderizarTabelaPerimetros();
+            }
         }
 
         function renderizarTabelaPerimetros() {
@@ -181,4 +188,43 @@
     </script>
 </body>
 </html>
-<!--criado por Lino Botelho de Souza-2018 -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Criado em 2019 Por Lino Botelho de Souza-->
