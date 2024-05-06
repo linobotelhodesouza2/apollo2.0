@@ -94,8 +94,8 @@
 
         salvarButton.addEventListener('click', function() {
             const perimetro = document.getElementById('perimetro').value;
-            if (perimetro.length > 3) {
-                alert("Coloque somente três números no histórico.");
+            if (perimetro.length > 4) {
+                alert("Coloque somente três números no perímetro.");
                 return;
             }
             const corte = document.getElementById('corte').value;
@@ -118,7 +118,7 @@
 
         function validarCorte(corte) {
             const corteValue = parseFloat(corte.replace(',', '.'));
-            return !isNaN(corteValue) && corteValue <= 200;
+            return !isNaN(corteValue) && corteValue <= 210;
         }
 
         function renderizarTabelaDados() {
