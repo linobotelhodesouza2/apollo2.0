@@ -8,7 +8,7 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-image: url('https://source.unsplash.com/1920x1080/?nature');
+            background-image: 
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
@@ -148,7 +148,7 @@
                         <td>${dado.corte}</td>
                         <td>${dado.observacao}</td>
                         <td>${dado.data}</td>
-                        <td><button class="btn btn-danger btn-sm" onclick="removerEntrada(${index})">Remover</button></td>
+                        <td><button class="btn btn-danger btn-sm" onclick="confirmarExclusao(${index})">Remover</button></td>
                     `;
                     body.appendChild(row);
                 });
@@ -157,6 +157,12 @@
                 tabelaDados.appendChild(table);
             } else {
                 tabelaDados.innerHTML = '<p>Nenhum dado encontrado para o perímetro especificado.</p>';
+            }
+        }
+
+        function confirmarExclusao(index) {
+            if (confirm("Tem certeza de que deseja excluir este dado?")) {
+                removerEntrada(index);
             }
         }
 
@@ -206,11 +212,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-<--!criado por Lino Botelho de Souza 2024-->
