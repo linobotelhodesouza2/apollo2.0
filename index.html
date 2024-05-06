@@ -3,10 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perímetros e Cortes</title>
+    <title>Perímetro e Corte</title>
     <!-- Adicionando Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        body {
+            background-image: url('https://source.unsplash.com/1920x1080/?nature');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            opacity: 0.9; /* Opacidade da imagem de fundo */
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.7); /* Fundo transparente */
+            padding: 20px;
+            border-radius: 10px;
+        }
         .perimetro-input, .corte-input {
             border: 1px solid black;
         }
@@ -19,8 +31,14 @@
     <div class="container">
         <h1 class="mt-5">Bem-vindo, <span id="nomeDigitado"></span>!</h1>
         <script>
-            // Solicita o nome do usuário
-            var nome = prompt("Qual é o seu nome?");
+            // Verifica se o nome já foi digitado anteriormente
+            let nome = localStorage.getItem('nome');
+            if (!nome) {
+                // Se não houver nome salvo, solicita o nome ao usuário
+                nome = prompt("Qual é o seu nome?");
+                // Salva o nome no armazenamento local
+                localStorage.setItem('nome', nome);
+            }
             // Exibe o nome na tela
             document.getElementById('nomeDigitado').innerText = nome;
         </script>
@@ -195,36 +213,4 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- Criado em 2019 Por Lino Botelho de Souza-->
+<--!criado por Lino Botelho de Souza 2024-->
