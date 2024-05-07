@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perímetros e Cortes Apollo</title>
+    <title>Perímetro e Corte</title>
     <!-- Adicionando Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            <!--background-image: url('https://source.unsplash.com/1920x1080/?nature');-->
+            background-image: url('https://source.unsplash.com/1920x1080/?nature');
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
@@ -45,7 +45,7 @@
         <form id="form" class="mt-3">
             <div class="form-row">
                 <div class="form-group col-md-3">
-                    <label for="perimetro">Perímetro:</label>
+                    <label for="perimetro">Histórico:</label>
                     <input type="number" class="form-control perimetro-input" id="perimetro" required maxlength="3">
                 </div>
                 <div class="form-group col-md-3">
@@ -75,8 +75,23 @@
 
     <!-- Adicionando Bootstrap JS (opcional, apenas se necessário) -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Adicionando Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-database.js"></script>
 
     <script>
+        // Inicialize o Firebase
+        const firebaseConfig = {
+            apiKey:"9be2a2cd4d6f11db81c153ca535b252d64bb0658"
+            authDomain: "apollo-ff7be.firebaseapp.com",
+            databaseURL: "https://apollo-ff7be-default-rtdb.firebaseio.com",
+            projectId: "apollo-ff7be",
+            storageBucket: "SEU_BUCKET.appspot.com",
+            messagingSenderId: "SEU_SENDER_ID",
+            appId: "109806800860327390960"
+        };
+        firebase.initializeApp(firebaseConfig);
+
         // JavaScript
         const form = document.getElementById('form');
         const salvarButton = document.getElementById('salvar');
@@ -84,9 +99,7 @@
         const tabelaDados = document.getElementById('tabelaDados');
         const tabelaHistoricos = document.getElementById('tabelaHistoricos');
 
-        // Carregar dados salvos localmente
-        const dadosSalvos = JSON.parse(localStorage.getItem('dados')) || [];
-        const historicosSalvos = new Set(dadosSalvos.map(dado => dado.perimetro));
+        const database = firebase.database();
 
         // Preencher a tabela de dados e a tabela de históricos
         renderizarTabelaDados();
@@ -94,8 +107,8 @@
 
         salvarButton.addEventListener('click', function() {
             const perimetro = document.getElementById('perimetro').value;
-            if (perimetro.length > 5) {
-                alert("Coloque somente quatro números no perímetro.");
+            if (perimetro.length > 3) {
+                alert("Coloque somente três números no histórico.");
                 return;
             }
             const corte = document.getElementById('corte').value;
@@ -106,123 +119,96 @@
             const observacao = document.getElementById('observacao').value;
             const data = new Date().toLocaleString();
 
-            // Salvar os dados localmente
-            dadosSalvos.push({ perimetro, corte, observacao, data });
-            localStorage.setItem('dados', JSON.stringify(dadosSalvos));
-            historicosSalvos.add(perimetro);
+            // Salvar os dados no Firebase
+            database.ref('dados').push({
+                perimetro,
+                corte,
+                observacao,
+                data
+            });
 
-            renderizarTabelaDados();
-            renderizarTabelaHistoricos();
             form.reset();
         });
 
         function validarCorte(corte) {
             const corteValue = parseFloat(corte.replace(',', '.'));
-            return !isNaN(corteValue) && corteValue <= 210;
+            return !isNaN(corteValue) && corteValue <= 200;
         }
 
         function renderizarTabelaDados() {
-            tabelaDados.innerHTML = '';
-            const perimetroBuscado = buscarPerimetroInput.value;
-            const dadosFiltrados = dadosSalvos.filter(dado => dado.perimetro == perimetroBuscado);
+            database.ref('dados').once('value', function(snapshot) {
+                tabelaDados.innerHTML = '';
+                const perimetroBuscado = buscarPerimetroInput.value;
+                const dados = snapshot.val();
+                const dadosFiltrados = Object.values(dados).filter(dado => dado.perimetro == perimetroBuscado);
 
-            if (dadosFiltrados.length > 0) {
-                const table = document.createElement('table');
-                table.classList.add('table', 'table-striped', 'mt-3');
-                const header = document.createElement('thead');
-                header.innerHTML = `
-                    <tr>
-                        <th>Histórico</th>
-                        <th>Corte</th>
-                        <th>Observação</th>
-                        <th>Data</th>
-                        <th></th>
-                    </tr>
-                `;
-                const body = document.createElement('tbody');
-                dadosFiltrados.forEach((dado, index) => {
-                    const row = document.createElement('tr');
-                    row.classList.add('linha-tabela');
-                    row.innerHTML = `
-                        <td>${dado.perimetro}</td>
-                        <td>${dado.corte}</td>
-                        <td>${dado.observacao}</td>
-                        <td>${dado.data}</td>
-                        <td><button class="btn btn-danger btn-sm" onclick="confirmarExclusao(${dadosSalvos.indexOf(dado)})">Remover</button></td>
+                if (dadosFiltrados.length > 0) {
+                    const table = document.createElement('table');
+                    table.classList.add('table', 'table-striped', 'mt-3');
+                    const header = document.createElement('thead');
+                    header.innerHTML = `
+                        <tr>
+                            <th>Histórico</th>
+                            <th>Corte</th>
+                            <th>Observação</th>
+                            <th>Data</th>
+                        </tr>
                     `;
-                    body.appendChild(row);
-                });
-                table.appendChild(header);
-                table.appendChild(body);
-                tabelaDados.appendChild(table);
-            } else {
-                tabelaDados.innerHTML = '<p>Nenhum dado encontrado para o histórico especificado.</p>';
-            }
-        }
-
-        function confirmarExclusao(index) {
-            if (confirm("Tem certeza de que deseja excluir este dado?")) {
-                removerEntrada(index);
-            }
-        }
-
-        function removerEntrada(index) {
-            const perimetroRemovido = dadosSalvos[index].perimetro;
-            dadosSalvos.splice(index, 1);
-            localStorage.setItem('dados', JSON.stringify(dadosSalvos));
-            renderizarTabelaDados();
-            
-            // Verificar se o histórico removido não possui mais dados associados
-            if (!dadosSalvos.some(dado => dado.perimetro === perimetroRemovido)) {
-                historicosSalvos.delete(perimetroRemovido);
-                renderizarTabelaHistoricos();
-            }
+                    const body = document.createElement('tbody');
+                    dadosFiltrados.forEach((dado, index) => {
+                        const row = document.createElement('tr');
+                        row.classList.add('linha-tabela');
+                        row.innerHTML = `
+                            <td>${dado.perimetro}</td>
+                            <td>${dado.corte}</td>
+                            <td>${dado.observacao}</td>
+                            <td>${dado.data}</td>
+                        `;
+                        body.appendChild(row);
+                    });
+                    table.appendChild(header);
+                    table.appendChild(body);
+                    tabelaDados.appendChild(table);
+                } else {
+                    tabelaDados.innerHTML = '<p>Nenhum dado encontrado para o histórico especificado.</p>';
+                }
+            });
         }
 
         function renderizarTabelaHistoricos() {
-            tabelaHistoricos.innerHTML = '';
-            const historicosOrdenados = Array.from(historicosSalvos).sort((a, b) => a - b);
+            database.ref('dados').once('value', function(snapshot) {
+                tabelaHistoricos.innerHTML = '';
+                const dados = snapshot.val();
+                const historicos = Object.values(dados).map(dado => dado.perimetro);
+                const historicosOrdenados = Array.from(new Set(historicos)).sort((a, b) => a - b);
 
-            if (historicosOrdenados.length > 0) {
-                const table = document.createElement('table');
-                table.classList.add('table', 'table-striped', 'mt-3');
-                const header = document.createElement('thead');
-                header.innerHTML = `
-                    <tr>
-                        <th>Histórico</th>
-                    </tr>
-                `;
-                const body = document.createElement('tbody');
-                historicosOrdenados.forEach(historico => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${historico}</td>
+                if (historicosOrdenados.length > 0) {
+                    const table = document.createElement('table');
+                    table.classList.add('table', 'table-striped', 'mt-3');
+                    const header = document.createElement('thead');
+                    header.innerHTML = `
+                        <tr>
+                            <th>Histórico</th>
+                        </tr>
                     `;
-                    body.appendChild(row);
-                });
-                table.appendChild(header);
-                table.appendChild(body);
-                tabelaHistoricos.appendChild(table);
-            } else {
-                tabelaHistoricos.innerHTML = '<p>Nenhum histórico adicionado até o momento.</p>';
-            }
+                    const body = document.createElement('tbody');
+                    historicosOrdenados.forEach(historico => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${historico}</td>
+                        `;
+                        body.appendChild(row);
+                    });
+                    table.appendChild(header);
+                    table.appendChild(body);
+                    tabelaHistoricos.appendChild(table);
+                } else {
+                    tabelaHistoricos.innerHTML = '<p>Nenhum histórico adicionado até o momento.</p>';
+                }
+            });
         }
 
         buscarPerimetroInput.addEventListener('input', renderizarTabelaDados);
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-  <!-- criado por LINO BOTELHO DE SOUZA 2021-->
