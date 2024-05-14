@@ -13,21 +13,21 @@
 </head>
 <body>
   <div class="container">
-    <h2>APOLLO</h2>
+    <h2>Cadastro de Produtos</h2>
     <div class="form-group">
-      <label for="productName">Nome do Produto:</label>
+      <label for="productName">Nome do Produto (até 30 caracteres):</label>
       <input type="text" class="form-control" id="productName" maxlength="30">
     </div>
     <div class="form-group">
-      <label for="productPerimeter">Perímetro:</label>
+      <label for="productPerimeter">Perímetro do Produto:</label>
       <input type="number" class="form-control" id="productPerimeter" step="any">
     </div>
     <div class="form-group">
-      <label for="productCut">Corte:</label>
+      <label for="productCut">Corte do Perímetro:</label>
       <input type="number" class="form-control" id="productCut" step="any">
     </div>
     <div class="form-group">
-      <label for="productComments">Obs:</label>
+      <label for="productComments">Comentários:</label>
       <input type="text" class="form-control" id="productComments" maxlength="30">
     </div>
     <button type="button" class="btn btn-primary" onclick="saveProduct()">Salvar</button>
@@ -36,19 +36,26 @@
   <div class="container">
     <h2>Pesquisar</h2>
     <div class="form-group">
-      <label for="searchInput">Pesquisar por Perímetro ou Produto:</label>
-      <input type="text" class="form-control" id="searchInput">
+      <label for="productSelect">Selecionar Produto:</label>
+      <select class="form-control" id="productSelect" onchange="showSelectedProduct()">
+        <option value="">Selecione um produto</option>
+      </select>
     </div>
-    <button type="button" class="btn btn-primary" onclick="searchProduct()">Pesquisar</button>
   </div>
 
-  <div class="container">
+  <div class="container mt-5">
+    <h2>Dados do Produto Selecionado</h2>
+    <div id="selectedProductDetails"></div>
+  </div>
+
+  <div class="container mt-5">
     <h2>Histórico de Perímetros</h2>
     <ul id="perimeterHistory" class="list-group"></ul>
   </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
+      loadProducts();
       loadHistory();
     });
 
@@ -91,6 +98,7 @@
       products.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
       updateHistory(products);
+      loadProducts();
 
       // Limpar os campos após salvar
       document.getElementById("productName").value = "";
@@ -99,6 +107,38 @@
       document.getElementById("productComments").value = "";
 
       alert("Produto salvo com sucesso!");
+    }
+
+    function loadProducts() {
+      var products = JSON.parse(localStorage.getItem("products")) || [];
+      var select = document.getElementById("productSelect");
+      select.innerHTML = '<option value="">Selecione um produto</option>';
+
+      products.forEach(function(product) {
+        var option = document.createElement("option");
+        option.value = product.name;
+        option.textContent = product.name;
+        select.appendChild(option);
+      });
+    }
+
+    function showSelectedProduct() {
+      var selectedProductName = document.getElementById("productSelect").value;
+      var products = JSON.parse(localStorage.getItem("products")) || [];
+      var selectedProduct = products.find(function(product) {
+        return product.name === selectedProductName;
+      });
+
+      if (selectedProduct) {
+        document.getElementById("selectedProductDetails").innerHTML = `
+          <p><strong>Nome:</strong> ${selectedProduct.name}</p>
+          <p><strong>Perímetro:</strong> ${selectedProduct.perimeter}</p>
+          <p><strong>Corte do Perímetro:</strong> ${selectedProduct.cut}</p>
+          <p><strong>Comentários:</strong> ${selectedProduct.comments}</p>
+        `;
+      } else {
+        document.getElementById("selectedProductDetails").innerHTML = "Nenhum produto selecionado.";
+      }
     }
 
     function loadHistory() {
@@ -133,49 +173,7 @@
       products.splice(index, 1);
       localStorage.setItem("products", JSON.stringify(products));
       updateHistory(products);
-    }
-
-    function searchProduct() {
-      var searchValue = document.getElementById("searchInput").value.trim().toUpperCase();
-      var products = JSON.parse(localStorage.getItem("products")) || [];
-
-      if (searchValue === "") {
-        updateHistory(products);
-        return;
-      }
-
-      var filteredProducts = products.filter(function(product) {
-        return product.name.toUpperCase().includes(searchValue) || product.perimeter.toString().includes(searchValue);
-      });
-
-      if (filteredProducts.length === 0) {
-        alert("Nenhum produto encontrado.");
-        return;
-      }
-
-      // Encontrar o produto mais recente nos produtos filtrados
-      var mostRecentProduct = filteredProducts.reduce(function(prev, current) {
-        return (new Date(prev.created_at) > new Date(current.created_at)) ? prev : current;
-      });
-
-      // Limpar o histórico e exibir apenas o produto mais recente
-      var perimeterHistory = document.getElementById("perimeterHistory");
-      perimeterHistory.innerHTML = "";
-
-      var listItem = document.createElement("li");
-      listItem.className = "list-group-item";
-
-      var removeButton = document.createElement("button");
-      removeButton.className = "btn btn-danger btn-sm float-right";
-      removeButton.textContent = "Remover";
-      removeButton.onclick = function() {
-        removeProduct(products.indexOf(mostRecentProduct));
-      };
-
-      listItem.textContent = "Nome: " + mostRecentProduct.name + ", Perímetro: " + mostRecentProduct.perimeter + ", Corte: " + mostRecentProduct.cut + ", Comentários: " + mostRecentProduct.comments;
-      listItem.appendChild(removeButton);
-
-      perimeterHistory.appendChild(listItem);
+      loadProducts();
     }
   </script>
 </body>
