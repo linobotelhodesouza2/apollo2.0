@@ -3,60 +3,73 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aplicação de Produtos</title>
+  <title>APOLLO</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
+    body {
+      background: url('https://via.placeholder.com/1920x1080') no-repeat center center fixed;
+      background-size: cover;
+      position: relative;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.8); /* Opacidade de 80% */
+    }
+
     .container {
       margin-top: 20px;
+      position: relative;
+      z-index: 1; /* Garante que o conteúdo da página fique na frente do fundo abstrato */
     }
   </style>
 </head>
 <body>
+  <div class="overlay"></div>
+
   <div class="container">
     <h2>Cadastro de Produtos</h2>
     <div class="form-group">
-      <label for="productName">Nome do Produto (até 30 caracteres):</label>
+      <label for="productName">Nome do Produto:</label>
       <input type="text" class="form-control" id="productName" maxlength="30">
     </div>
     <div class="form-group">
-      <label for="productPerimeter">Perímetro do Produto:</label>
+      <label for="productPerimeter">Perímetro:</label>
       <input type="number" class="form-control" id="productPerimeter" step="any">
     </div>
     <div class="form-group">
-      <label for="productCut">Corte do Perímetro:</label>
+      <label for="productCut">Corte:</label>
       <input type="number" class="form-control" id="productCut" step="any">
     </div>
     <div class="form-group">
-      <label for="productComments">Comentários:</label>
+      <label for="productComments">OBS:</label>
       <input type="text" class="form-control" id="productComments" maxlength="30">
     </div>
     <button type="button" class="btn btn-primary" onclick="saveProduct()">Salvar</button>
   </div>
 
-  <div class="container">
-    <h2>Pesquisar</h2>
+  <div class="container mt-5">
+    <h2>Histórico de Perímetros</h2>
     <div class="form-group">
       <label for="productSelect">Selecionar Produto:</label>
       <select class="form-control" id="productSelect" onchange="showSelectedProduct()">
         <option value="">Selecione um produto</option>
       </select>
     </div>
+    <button type="button" class="btn btn-danger" onclick="removeSelectedProduct()">Remover</button>
   </div>
 
-  <div class="container mt-5">
-    <h2>Dados do Produto Selecionado</h2>
+  <div class="container mt-3">
     <div id="selectedProductDetails"></div>
-  </div>
-
-  <div class="container mt-5">
-    <h2>Histórico de Perímetros</h2>
-    <ul id="perimeterHistory" class="list-group"></ul>
   </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       loadProducts();
-      loadHistory();
     });
 
     function saveProduct() {
@@ -94,10 +107,6 @@
       }
 
       localStorage.setItem("products", JSON.stringify(products));
-
-      products.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-      updateHistory(products);
       loadProducts();
 
       // Limpar os campos após salvar
@@ -116,64 +125,40 @@
 
       products.forEach(function(product) {
         var option = document.createElement("option");
-        option.value = product.name;
+        option.value = JSON.stringify(product);
         option.textContent = product.name;
         select.appendChild(option);
       });
     }
 
     function showSelectedProduct() {
-      var selectedProductName = document.getElementById("productSelect").value;
-      var products = JSON.parse(localStorage.getItem("products")) || [];
-      var selectedProduct = products.find(function(product) {
-        return product.name === selectedProductName;
-      });
+      var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
+      var detailsContainer = document.getElementById("selectedProductDetails");
+      detailsContainer.innerHTML = `
+        <h4>Dados do Produto Selecionado</h4>
+        <p><strong>Nome:</strong> ${selectedProduct.name}</p>
+        <p><strong>Perímetro:</strong> ${selectedProduct.perimeter}</p>
+        <p><strong>Corte do Perímetro:</strong> ${selectedProduct.cut}</p>
+        <p><strong>Comentários:</strong> ${selectedProduct.comments}</p>
+      `;
+    }
 
-      if (selectedProduct) {
-        document.getElementById("selectedProductDetails").innerHTML = `
-          <p><strong>Nome:</strong> ${selectedProduct.name}</p>
-          <p><strong>Perímetro:</strong> ${selectedProduct.perimeter}</p>
-          <p><strong>Corte do Perímetro:</strong> ${selectedProduct.cut}</p>
-          <p><strong>Comentários:</strong> ${selectedProduct.comments}</p>
-        `;
-      } else {
-        document.getElementById("selectedProductDetails").innerHTML = "Nenhum produto selecionado.";
+    function removeSelectedProduct() {
+      var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
+      if (!selectedProduct) {
+        alert("Nenhum produto selecionado.");
+        return;
       }
-    }
 
-    function loadHistory() {
       var products = JSON.parse(localStorage.getItem("products")) || [];
-      updateHistory(products);
-    }
-
-    function updateHistory(products) {
-      var perimeterHistory = document.getElementById("perimeterHistory");
-      perimeterHistory.innerHTML = "";
-
-      products.forEach(function(product, index) {
-        var listItem = document.createElement("li");
-        listItem.className = "list-group-item";
-
-        var removeButton = document.createElement("button");
-        removeButton.className = "btn btn-danger btn-sm float-right";
-        removeButton.textContent = "Remover";
-        removeButton.onclick = function() {
-          removeProduct(index);
-        };
-
-        listItem.textContent = "Nome: " + product.name + ", Perímetro: " + product.perimeter + ", Corte: " + product.cut + ", Comentários: " + product.comments;
-        listItem.appendChild(removeButton);
-
-        perimeterHistory.appendChild(listItem);
+      var updatedProducts = products.filter(function(product) {
+        return JSON.stringify(product) !== document.getElementById("productSelect").value;
       });
-    }
 
-    function removeProduct(index) {
-      var products = JSON.parse(localStorage.getItem("products")) || [];
-      products.splice(index, 1);
-      localStorage.setItem("products", JSON.stringify(products));
-      updateHistory(products);
+      localStorage.setItem("products", JSON.stringify(updatedProducts));
       loadProducts();
+      document.getElementById("selectedProductDetails").innerHTML = "";
+      alert("Produto removido com sucesso!");
     }
   </script>
 </body>
