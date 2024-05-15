@@ -47,13 +47,13 @@
     </div>
     <div class="form-group">
       <label for="productComments">OBS:</label>
-      <input type="text" class="form-control" id="productComments" maxlength="30">
+      <input type="text" class="form-control" id="productComments" maxlength="200">
     </div>
     <button type="button" class="btn btn-primary" onclick="saveProduct()">Salvar</button>
   </div>
 
   <div class="container mt-5">
-    <h2>Histórico de Perímetros</h2>
+    <h2>Histórico de Produtos</h2>
     <div class="form-group">
       <label for="productSelect">Selecionar Produto:</label>
       <select class="form-control" id="productSelect" onchange="showSelectedProduct()">
@@ -120,6 +120,18 @@
 
     function loadProducts() {
       var products = JSON.parse(localStorage.getItem("products")) || [];
+      products.sort(function(a, b) {
+        var nameA = a.name.toUpperCase();
+        var nameB = b.name.toUpperCase();
+        if (nameA < nameB) {
+          return -1;
+        }
+        if (nameA > nameB) {
+          return 1;
+        }
+        return 0;
+      });
+
       var select = document.getElementById("productSelect");
       select.innerHTML = '<option value="">Selecione um produto</option>';
 
