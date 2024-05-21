@@ -71,16 +71,6 @@
       border-color: #bd2130;
     }
 
-    .btn-secondary {
-      background-color: #6c757d;
-      border-color: #6c757d;
-    }
-
-    .btn-secondary:hover {
-      background-color: #5a6268;
-      border-color: #545b62;
-    }
-
     #selectedProductDetails {
       background-color: #f8f9fa;
       border-radius: 8px;
@@ -103,23 +93,6 @@
     .feedback-error {
       background-color: #f8d7da;
       color: #721c24;
-    }
-
-    .comment-list {
-      list-style-type: none;
-      padding-left: 0;
-    }
-
-    .comment-list li {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 5px 0;
-    }
-
-    .comment-date {
-      font-size: 0.9em;
-      color: #6c757d;
     }
   </style>
 </head>
@@ -174,53 +147,40 @@
       var productPerimeter = document.getElementById("productPerimeter").value.trim();
       var productCut = document.getElementById("productCut").value.trim();
       var productComments = document.getElementById("productComments").value.trim();
+      var currentDate = new Date();
+      var formattedDate = currentDate.toLocaleDateString('pt-BR') + ' ' + currentDate.toLocaleTimeString('pt-BR');
 
       if (productName === "") {
         alert("Por favor, insira o nome do produto.");
         return;
       }
 
-      if (isNaN(productPerimeter) || productPerimeter === "") {
+      if (isNaN(productPerimeter)) {
         alert("O perímetro do produto deve ser um número.");
         return;
       }
 
-      if (isNaN(productCut) || productCut === "") {
+      if (isNaN(productCut)) {
         alert("O corte do perímetro deve ser um número.");
         return;
       }
+
+      productComments = `${productComments} (Data: ${formattedDate})`;
 
       var products = JSON.parse(localStorage.getItem("products")) || [];
       var existingProductIndex = products.findIndex(function(product) {
         return product.name === productName && product.perimeter === parseFloat(productPerimeter);
       });
 
-      var comment = {
-        text: productComments,
-        date: new Date().toLocaleString()
-      };
-
       if (existingProductIndex !== -1) {
-        // Se o produto já existe, adicione o novo comentário à lista de comentários
-        if (!products[existingProductIndex].comments) {
-          products[existingProductIndex].comments = [];
-        }
-        products[existingProductIndex].comments.push(comment);
+        products[existingProductIndex] = { name: productName, perimeter: parseFloat(productPerimeter), cut: parseFloat(productCut), comments: productComments, created_at: new Date() };
       } else {
-        // Se não, adicione o novo produto com os comentários em uma lista
-        products.push({
-          name: productName,
-          perimeter: parseFloat(productPerimeter),
-          cut: parseFloat(productCut),
-          comments: [comment],
-          created_at: new Date().toLocaleString()
-        });
+        products.push({ name: productName, perimeter: parseFloat(productPerimeter), cut: parseFloat(productCut), comments: productComments, created_at: new Date() });
       }
 
       localStorage.setItem("products", JSON.stringify(products));
       loadProducts();
 
-      // Limpar os campos após salvar
       document.getElementById("productName").value = "";
       document.getElementById("productPerimeter").value = "";
       document.getElementById("productCut").value = "";
@@ -261,23 +221,12 @@
     function showSelectedProduct() {
       var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
       var detailsContainer = document.getElementById("selectedProductDetails");
-      if (!selectedProduct) {
-        detailsContainer.innerHTML = '';
-        return;
-      }
-      var commentsHtml = selectedProduct.comments.map((comment, index) => `
-        <li>
-          <span class="comment-date">${comment.date}</span> - ${comment.text}
-          <button class="btn btn-secondary btn-sm" onclick="removeComment(${index})">Remover</button>
-        </li>
-      `).join('');
       detailsContainer.innerHTML = `
         <h4>Dados do Produto Selecionado</h4>
         <p><strong>Nome:</strong> ${selectedProduct.name}</p>
         <p><strong>Perímetro:</strong> ${selectedProduct.perimeter}</p>
         <p><strong>Corte do Perímetro:</strong> ${selectedProduct.cut}</p>
-        <p><strong>Comentários:</strong></p>
-        <ul class="comment-list">${commentsHtml}</ul>
+        <p><strong>Comentários:</strong> ${selectedProduct.comments}</p>
       `;
     }
 
@@ -302,23 +251,6 @@
       setTimeout(function() {
         removeFeedback.style.display = "none";
       }, 3000);
-    }
-
-    function removeComment(commentIndex) {
-      var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
-      if (!selectedProduct) {
-        alert("Nenhum produto selecionado.");
-        return;
-      }
-
-      var products = JSON.parse(localStorage.getItem("products")) || [];
-      var productIndex = products.findIndex(product => product.name === selectedProduct.name && product.perimeter === selectedProduct.perimeter);
-
-      if (productIndex !== -1) {
-        products[productIndex].comments.splice(commentIndex, 1);
-        localStorage.setItem("products", JSON.stringify(products));
-        showSelectedProduct();
-      }
     }
   </script>
 </body>
