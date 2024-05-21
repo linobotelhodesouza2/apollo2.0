@@ -267,8 +267,7 @@
       }
       var commentsHtml = selectedProduct.comments.map((comment, index) => `
         <li>
-          <span class="comment-date">${comment.date}</span>:
-          <span>${comment.text}</span>
+          <span class="comment-date">${comment.date}</span> - ${comment.text}
           <button class="btn btn-secondary btn-sm" onclick="removeComment(${index})">Remover</button>
         </li>
       `).join('');
