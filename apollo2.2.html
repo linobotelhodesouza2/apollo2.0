@@ -175,6 +175,7 @@
 
       if (existingProductIndex !== -1) {
         // Se o produto já existe, adicione o novo comentário à lista de comentários
+        products[existingProductIndex].comments = products[existingProductIndex].comments || [];
         products[existingProductIndex].comments.push(comment);
       } else {
         // Se não, adicione o novo produto com os comentários em uma lista
