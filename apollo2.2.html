@@ -87,6 +87,23 @@
       font-size: 12px;
       color: #666;
     }
+
+    .feedback {
+      margin-top: 20px;
+      display: none;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .feedback-success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .feedback-error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
   </style>
 </head>
 <body>
@@ -115,13 +132,25 @@
   </div>
 
   <div class="container mt-5">
-    <h2>Comentários do Produto</h2>
+    <h2>Histórico de Produtos</h2>
+    <div class="form-group">
+      <label for="productSelect">Selecionar Produto:</label>
+      <select class="form-control" id="productSelect" onchange="showSelectedProduct()">
+        <option value="">Selecione um produto</option>
+      </select>
+    </div>
+    <button type="button" class="btn btn-danger" onclick="removeSelectedProduct()">Remover</button>
+    <div id="removeFeedback" class="feedback feedback-success">Produto removido com sucesso!</div>
+  </div>
+
+  <div class="container mt-3">
+    <div id="selectedProductDetails"></div>
     <div id="commentsContainer"></div>
   </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-      loadComments();
+      loadProducts();
     });
 
     function saveProduct() {
@@ -146,11 +175,26 @@
         return;
       }
 
-      var comments = JSON.parse(localStorage.getItem("comments")) || [];
-      comments.unshift({ name: productName, perimeter: parseFloat(productPerimeter), cut: parseFloat(productCut), comment: productComments, date: commentDate });
-      localStorage.setItem("comments", JSON.stringify(comments));
+      var products = JSON.parse(localStorage.getItem("products")) || [];
+      var existingProductIndex = products.findIndex(function(product) {
+        return product.name === productName && product.perimeter === parseFloat(productPerimeter);
+      });
 
-      loadComments();
+      if (existingProductIndex !== -1) {
+        products[existingProductIndex].cut = parseFloat(productCut);
+        products[existingProductIndex].comments.push({ text: productComments, date: commentDate });
+      } else {
+        products.push({ 
+          name: productName, 
+          perimeter: parseFloat(productPerimeter), 
+          cut: parseFloat(productCut), 
+          comments: [{ text: productComments, date: commentDate }],
+          created_at: new Date() 
+        });
+      }
+
+      localStorage.setItem("products", JSON.stringify(products));
+      loadProducts();
 
       document.getElementById("productName").value = "";
       document.getElementById("productPerimeter").value = "";
@@ -164,20 +208,84 @@
       }, 3000);
     }
 
-    function loadComments() {
-      var comments = JSON.parse(localStorage.getItem("comments")) || [];
-      var commentsContainer = document.getElementById("commentsContainer");
-      commentsContainer.innerHTML = "";
+    function loadProducts() {
+      var products = JSON.parse(localStorage.getItem("products")) || [];
+      products.sort(function(a, b) {
+        var nameA = a.name.toUpperCase();
+        var nameB = b.name.toUpperCase();
+        if (nameA < nameB) {
+          return -1;
+        }
+        if (nameA > nameB) {
+          return 1;
+        }
+        return 0;
+      });
 
-      comments.forEach(function(comment) {
+      var select = document.getElementById("productSelect");
+      select.innerHTML = '<option value="">Selecione um produto</option>';
+
+      products.forEach(function(product) {
+        var option = document.createElement("option");
+        option.value = JSON.stringify(product);
+        option.textContent = product.name;
+        select.appendChild(option);
+      });
+    }
+
+    function showSelectedProduct() {
+      var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
+      var detailsContainer = document.getElementById("selectedProductDetails");
+      var commentsContainer = document.getElementById("commentsContainer");
+
+      if (!selectedProduct) {
+        detailsContainer.innerHTML = "";
+        commentsContainer.innerHTML = "";
+        return;
+      }
+
+      detailsContainer.innerHTML = `
+        <h4>Dados do Produto Selecionado</h4>
+        <p><strong>Nome:</strong> ${selectedProduct.name}</p>
+        <p><strong>Perímetro:</strong> ${selectedProduct.perimeter}</p>
+        <p><strong>Corte do Perímetro:</strong> ${selectedProduct.cut}</p>
+      `;
+
+      commentsContainer.innerHTML = "<h4>Comentários</h4>";
+
+      selectedProduct.comments.forEach(function(comment) {
         var commentDiv = document.createElement("div");
         commentDiv.classList.add("comment");
         commentDiv.innerHTML = `
-          <p><strong>${comment.name}</strong>: ${comment.comment}</p>
+          <p>${comment.text}</p>
           <p class="comment-date">${comment.date}</p>
         `;
-        commentsContainer.appendChild(commentDiv);
+        commentsContainer.insertBefore(commentDiv, commentsContainer.firstChild);
       });
+    }
+
+    function removeSelectedProduct() {
+      var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
+      if (!selectedProduct) {
+        alert("Nenhum produto selecionado.");
+        return;
+      }
+
+      var products = JSON.parse(localStorage.getItem("products")) || [];
+      var updatedProducts = products.filter(function(product) {
+        return JSON.stringify(product) !== document.getElementById("productSelect").value;
+      });
+
+      localStorage.setItem("products", JSON.stringify(updatedProducts));
+      loadProducts();
+      document.getElementById("selectedProductDetails").innerHTML = "";
+      document.getElementById("commentsContainer").innerHTML = "";
+
+      var removeFeedback = document.getElementById("removeFeedback");
+      removeFeedback.style.display = "block";
+      setTimeout(function() {
+        removeFeedback.style.display = "none";
+      }, 3000);
     }
   </script>
 </body>
