@@ -1,214 +1,253 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perímetro e Corte</title>
-    <!-- Adicionando Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-image: url('https://source.unsplash.com/1920x1080/?nature');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            opacity: 0.9; /* Opacidade da imagem de fundo */
-        }
-        .container {
-            background-color: rgba(255, 255, 255, 0.7); /* Fundo transparente */
-            padding: 20px;
-            border-radius: 10px;
-        }
-        .perimetro-input, .corte-input {
-            border: 1px solid black;
-        }
-        .linha-tabela {
-            margin-bottom: 10px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplicação de Produtos</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      background: url('https://via.placeholder.com/1920x1080') no-repeat center center fixed;
+      background-size: cover;
+      position: relative;
+      font-family: Arial, sans-serif;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.8); /* Opacidade de 80% */
+    }
+
+    .container {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 1;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-control {
+      border-radius: 8px;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn {
+      border-radius: 8px;
+      padding: 10px 20px;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
+      border-color: #0056b3;
+    }
+
+    .btn-danger {
+      background-color: #dc3545;
+      border-color: #dc3545;
+    }
+
+    .btn-danger:hover {
+      background-color: #c82333;
+      border-color: #bd2130;
+    }
+
+    #selectedProductDetails {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .feedback {
+      margin-top: 20px;
+      display: none;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .feedback-success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .feedback-error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-5">Bem-vindo, <span id="nomeDigitado"></span>!</h1>
-        <script>
-            // Verifica se o nome já foi digitado anteriormente
-            let nome = localStorage.getItem('nome');
-            if (!nome) {
-                // Se não houver nome salvo, solicita o nome ao usuário
-                nome = prompt("Qual é o seu nome?");
-                // Salva o nome no armazenamento local
-                localStorage.setItem('nome', nome);
-            }
-            // Exibe o nome na tela
-            document.getElementById('nomeDigitado').innerText = nome;
-        </script>
-        <form id="form" class="mt-3">
-            <div class="form-row">
-                <div class="form-group col-md-3">
-                    <label for="perimetro">Histórico:</label>
-                    <input type="number" class="form-control perimetro-input" id="perimetro" required maxlength="3">
-                </div>
-                <div class="form-group col-md-3">
-                    <label for="corte">Corte:</label>
-                    <input type="text" class="form-control corte-input" id="corte" required>
-                </div>
-                <div class="form-group col-md-4">
-                    <label for="observacao">Observação:</label>
-                    <input type="text" class="form-control" id="observacao">
-                </div>
-                <div class="form-group col-md-2 d-flex align-items-end">
-                    <button type="button" class="btn btn-primary btn-block" id="salvar">Salvar</button>
-                </div>
-            </div>
-        </form>
-        <div class="mt-5">
-            <label for="buscarPerimetro">Buscar por Histórico:</label>
-            <input type="number" class="form-control" id="buscarPerimetro" placeholder="Digite o histórico">
-        </div>
-        <div id="tabelaDados" class="mt-3">
-            <!-- A tabela dos dados salvos será exibida aqui -->
-        </div>
-        <div id="tabelaHistoricos" class="mt-5">
-            <!-- A tabela com os históricos adicionados até o momento será exibida aqui -->
-        </div>
+  <div class="overlay"></div>
+
+  <div class="container">
+    <h2>Cadastro de Produtos</h2>
+    <div class="form-group">
+      <label for="productName">Nome do Produto (até 30 caracteres):</label>
+      <input type="text" class="form-control" id="productName" maxlength="30">
     </div>
+    <div class="form-group">
+      <label for="productPerimeter">Perímetro do Produto:</label>
+      <input type="number" class="form-control" id="productPerimeter" step="any">
+    </div>
+    <div class="form-group">
+      <label for="productCut">Corte do Perímetro:</label>
+      <input type="number" class="form-control" id="productCut" step="any">
+    </div>
+    <div class="form-group">
+      <label for="productComments">Comentários (até 200 caracteres):</label>
+      <input type="text" class="form-control" id="productComments" maxlength="200">
+    </div>
+    <button type="button" class="btn btn-primary" onclick="saveProduct()">Salvar</button>
+    <div id="saveFeedback" class="feedback feedback-success">Produto salvo com sucesso!</div>
+  </div>
 
-    <!-- Adicionando Bootstrap JS (opcional, apenas se necessário) -->
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <div class="container mt-5">
+    <h2>Histórico de Perímetros</h2>
+    <div class="form-group">
+      <label for="productSelect">Selecionar Produto:</label>
+      <select class="form-control" id="productSelect" onchange="showSelectedProduct()">
+        <option value="">Selecione um produto</option>
+      </select>
+    </div>
+    <button type="button" class="btn btn-danger" onclick="removeSelectedProduct()">Remover</button>
+    <div id="removeFeedback" class="feedback feedback-success">Produto removido com sucesso!</div>
+  </div>
 
-    <script>
-        // JavaScript
-        const form = document.getElementById('form');
-        const salvarButton = document.getElementById('salvar');
-        const buscarPerimetroInput = document.getElementById('buscarPerimetro');
-        const tabelaDados = document.getElementById('tabelaDados');
-        const tabelaHistoricos = document.getElementById('tabelaHistoricos');
+  <div class="container mt-3">
+    <div id="selectedProductDetails"></div>
+  </div>
 
-        // Carregar dados salvos localmente
-        let dadosSalvos = JSON.parse(localStorage.getItem('dados')) || [];
-        const historicosSalvos = new Set(dadosSalvos.map(dado => dado.perimetro));
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      loadProducts();
+    });
 
-        // Preencher a tabela de dados e a tabela de históricos
-        renderizarTabelaDados();
-        renderizarTabelaHistoricos();
+    function saveProduct() {
+      var productName = document.getElementById("productName").value.trim().toUpperCase();
+      var productPerimeter = document.getElementById("productPerimeter").value.trim();
+      var productCut = document.getElementById("productCut").value.trim();
+      var productComments = document.getElementById("productComments").value.trim();
 
-        salvarButton.addEventListener('click', function() {
-            const perimetro = document.getElementById('perimetro').value;
-            if (perimetro.length > 3) {
-                alert("Coloque somente três números no histórico.");
-                return;
-            }
-            const corte = document.getElementById('corte').value;
-            if (!validarCorte(corte)) {
-                alert("Coloque novamente o corte. Este corte está errado.");
-                return;
-            }
-            const observacao = document.getElementById('observacao').value;
-            const data = new Date().toLocaleString();
+      if (productName === "") {
+        alert("Por favor, insira o nome do produto.");
+        return;
+      }
 
-            // Salvar os dados localmente
-            dadosSalvos.push({ perimetro, corte, observacao, data });
-            localStorage.setItem('dados', JSON.stringify(dadosSalvos));
-            historicosSalvos.add(perimetro);
+      if (isNaN(productPerimeter)) {
+        alert("O perímetro do produto deve ser um número.");
+        return;
+      }
 
-            renderizarTabelaDados();
-            renderizarTabelaHistoricos();
-            form.reset();
-        });
+      if (isNaN(productCut)) {
+        alert("O corte do perímetro deve ser um número.");
+        return;
+      }
 
-        function validarCorte(corte) {
-            const corteValue = parseFloat(corte.replace(',', '.'));
-            return !isNaN(corteValue) && corteValue <= 200;
+      var products = JSON.parse(localStorage.getItem("products")) || [];
+      var existingProductIndex = products.findIndex(function(product) {
+        return product.name === productName && product.perimeter === parseFloat(productPerimeter);
+      });
+
+      if (existingProductIndex !== -1) {
+        products[existingProductIndex] = { name: productName, perimeter: parseFloat(productPerimeter), cut: parseFloat(productCut), comments: productComments, created_at: new Date() };
+      } else {
+        products.push({ name: productName, perimeter: parseFloat(productPerimeter), cut: parseFloat(productCut), comments: productComments, created_at: new Date() });
+      }
+
+      localStorage.setItem("products", JSON.stringify(products));
+      loadProducts();
+
+      document.getElementById("productName").value = "";
+      document.getElementById("productPerimeter").value = "";
+      document.getElementById("productCut").value = "";
+      document.getElementById("productComments").value = "";
+
+      var saveFeedback = document.getElementById("saveFeedback");
+      saveFeedback.style.display = "block";
+      setTimeout(function() {
+        saveFeedback.style.display = "none";
+      }, 3000);
+    }
+
+    function loadProducts() {
+      var products = JSON.parse(localStorage.getItem("products")) || [];
+      products.sort(function(a, b) {
+        var nameA = a.name.toUpperCase();
+        var nameB = b.name.toUpperCase();
+        if (nameA < nameB) {
+          return -1;
         }
-
-        function renderizarTabelaDados() {
-            tabelaDados.innerHTML = '';
-            const perimetroBuscado = buscarPerimetroInput.value;
-            const dadosFiltrados = dadosSalvos.filter(dado => dado.perimetro == perimetroBuscado);
-
-            if (dadosFiltrados.length > 0) {
-                const table = document.createElement('table');
-                table.classList.add('table', 'table-striped', 'mt-3');
-                const header = document.createElement('thead');
-                header.innerHTML = `
-                    <tr>
-                        <th>Histórico</th>
-                        <th>Corte</th>
-                        <th>Observação</th>
-                        <th>Data</th>
-                        <th></th>
-                    </tr>
-                `;
-                const body = document.createElement('tbody');
-                dadosFiltrados.forEach((dado, index) => {
-                    const row = document.createElement('tr');
-                    row.classList.add('linha-tabela');
-                    row.innerHTML = `
-                        <td>${dado.perimetro}</td>
-                        <td>${dado.corte}</td>
-                        <td>${dado.observacao}</td>
-                        <td>${dado.data}</td>
-                        <td><button class="btn btn-danger btn-sm" onclick="confirmarExclusao(${dadosSalvos.indexOf(dado)})">Remover</button></td>
-                    `;
-                    body.appendChild(row);
-                });
-                table.appendChild(header);
-                table.appendChild(body);
-                tabelaDados.appendChild(table);
-            } else {
-                tabelaDados.innerHTML = '<p>Nenhum dado encontrado para o histórico especificado.</p>';
-            }
+        if (nameA > nameB) {
+          return 1;
         }
+        return 0;
+      });
 
-        function confirmarExclusao(index) {
-            if (confirm("Tem certeza de que deseja excluir este dado?")) {
-                removerEntrada(index);
-            }
-        }
+      var select = document.getElementById("productSelect");
+      select.innerHTML = '<option value="">Selecione um produto</option>';
 
-        function removerEntrada(index) {
-            const perimetroRemovido = dadosSalvos[index].perimetro;
-            dadosSalvos.splice(index, 1);
-            localStorage.setItem('dados', JSON.stringify(dadosSalvos));
-            renderizarTabelaDados();
-            
-            // Verificar se o histórico removido não possui mais dados associados
-            if (!dadosSalvos.some(dado => dado.perimetro === perimetroRemovido)) {
-                historicosSalvos.delete(perimetroRemovido);
-                renderizarTabelaHistoricos();
-            }
-        }
+      products.forEach(function(product) {
+        var option = document.createElement("option");
+        option.value = JSON.stringify(product);
+        option.textContent = product.name;
+        select.appendChild(option);
+      });
+    }
 
-        function renderizarTabelaHistoricos() {
-            tabelaHistoricos.innerHTML = '';
-            const historicosOrdenados = Array.from(historicosSalvos).sort((a, b) => a - b);
+    function showSelectedProduct() {
+      var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
+      var detailsContainer = document.getElementById("selectedProductDetails");
+      detailsContainer.innerHTML = `
+        <h4>Dados do Produto Selecionado</h4>
+        <p><strong>Nome:</strong> ${selectedProduct.name}</p>
+        <p><strong>Perímetro:</strong> ${selectedProduct.perimeter}</p>
+        <p><strong>Corte do Perímetro:</strong> ${selectedProduct.cut}</p>
+        <p><strong>Comentários:</strong> ${selectedProduct.comments}</p>
+      `;
+    }
 
-            if (historicosOrdenados.length > 0) {
-                const table = document.createElement('table');
-                table.classList.add('table', 'table-striped', 'mt-3');
-                const header = document.createElement('thead');
-                header.innerHTML = `
-                    <tr>
-                        <th>Histórico</th>
-                    </tr>
-                `;
-                const body = document.createElement('tbody');
-                historicosOrdenados.forEach(historico => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${historico}</td>
-                    `;
-                    body.appendChild(row);
-                });
-                table.appendChild(header);
-                table.appendChild(body);
-                tabelaHistoricos.appendChild(table);
-            } else {
-                tabelaHistoricos.innerHTML = '<p>Nenhum histórico adicionado até o momento.</p>';
-            }
-        }
+    function removeSelectedProduct() {
+      var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
+      if (!selectedProduct) {
+        alert("Nenhum produto selecionado.");
+        return;
+      }
 
-        buscarPerimetroInput.addEventListener('input', renderizarTabelaDados);
-    </script>
+      var products = JSON.parse(localStorage.getItem("products")) || [];
+      var updatedProducts = products.filter(function(product) {
+        return JSON.stringify(product) !== document.getElementById("productSelect").value;
+      });
+
+      localStorage.setItem("products", JSON.stringify(updatedProducts));
+      loadProducts();
+      document.getElementById("selectedProductDetails").innerHTML = "";
+
+      var removeFeedback = document.getElementById("removeFeedback");
+      removeFeedback.style.display = "block";
+      setTimeout(function() {
+        removeFeedback.style.display = "none";
+      }, 3000);
+    }
+  </script>
 </body>
 </html>
