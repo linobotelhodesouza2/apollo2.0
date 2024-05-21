@@ -180,7 +180,7 @@
         return product.name === productName && product.perimeter === parseFloat(productPerimeter);
       });
 
-      var newComment = { text: productComments, date: new Date() };
+      var newComment = { text: productComments, date: new Date().toLocaleString() };
       
       if (existingProductIndex !== -1) {
         var product = products[existingProductIndex];
@@ -192,89 +192,101 @@
           perimeter: parseFloat(productPerimeter),
           cut: parseFloat(productCut),
           comments: [newComment],
-          created_at: new Date()
+          created_at: new Date().toLocaleString()
         });
       }
 
       localStorage.setItem("products", JSON.stringify(products));
       loadProducts();
 
-      document.getElementById("productName").value = "";
-      document.getElementById("productPerimeter").value = "";
-      document.getElementById("productCut").value = "";
-      document.getElementById("productComments").value = "";
+      document.getElementById("
 
-      var saveFeedback = document.getElementById("saveFeedback");
-      saveFeedback.style.display = "block";
-      setTimeout(function() {
-        saveFeedback.style.display = "none";
-      }, 3000);
+
+
+
+productName").value = "";
+document.getElementById("productPerimeter").value = "";
+document.getElementById("productCut").value = "";
+document.getElementById("productComments").value = "";
+
+
+
+
+
+  var saveFeedback = document.getElementById("saveFeedback");
+  saveFeedback.style.display = "block";
+  setTimeout(function() {
+    saveFeedback.style.display = "none";
+  }, 3000);
+}
+
+function loadProducts() {
+  var products = JSON.parse(localStorage.getItem("products")) || [];
+  products.sort(function(a, b) {
+    var nameA = a.name.toUpperCase();
+    var nameB = b.name.toUpperCase();
+    if (nameA < nameB) {
+      return -1;
     }
-
-    function loadProducts() {
-      var products = JSON.parse(localStorage.getItem("products")) || [];
-      products.sort(function(a, b) {
-        var nameA = a.name.toUpperCase();
-        var nameB = b.name.toUpperCase();
-        if (nameA < nameB) {
-          return -1;
-        }
-        if (nameA > nameB) {
-          return 1;
-        }
-        return 0;
-      });
-
-      var select = document.getElementById("productSelect");
-      select.innerHTML = '<option value="">Selecione um produto</option>';
-
-      products.forEach(function(product) {
-        var option = document.createElement("option");
-        option.value = JSON.stringify(product);
-        option.textContent = product.name;
-        select.appendChild(option);
-      });
+    if (nameA > nameB) {
+      return 1;
     }
+    return 0;
+  });
 
-    function showSelectedProduct() {
-      var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
-      var detailsContainer = document.getElementById("selectedProductDetails");
-      var commentsHtml = selectedProduct.comments
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .map(comment => `<div class="comment"><div class="comment-date">${new Date(comment.date).toLocaleString()}</div>${comment.text}</div>`)
-        .join("");
-      detailsContainer.innerHTML = `
-        <h4>Dados do Produto Selecionado</h4>
-        <p><strong>Nome:</strong> ${selectedProduct.name}</p>
-        <p><strong>Perímetro:</strong> ${selectedProduct.perimeter}</p>
-        <p><strong>Corte do Perímetro:</strong> ${selectedProduct.cut}</p>
-        <h5>Comentários:</h5>
-        ${commentsHtml}
-      `;
-    }
+  var select = document.getElementById("productSelect");
+  select.innerHTML = '<option value="">Selecione um produto</option>';
 
-    function removeSelectedProduct() {
-      var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
-      if (!selectedProduct) {
-        alert("Nenhum produto selecionado.");
-        return;
-      }
+  products.forEach(function(product) {
+    var option = document.createElement("option");
+    option.value = JSON.stringify(product);
+    option.textContent = product.name;
+    select.appendChild(option);
+  });
+}
 
-      var products = JSON.parse(localStorage.getItem("products")) || [];
-      var updatedProducts = products.filter(function(product) {
-        return JSON.stringify(product) !== document.getElementById("productSelect").value;
-      });
+function showSelectedProduct() {
+  var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
+  var detailsContainer = document.getElementById("selectedProductDetails");
+  var commentsHtml = selectedProduct.comments
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .map(comment => `<div class="comment"><div class="comment-date">${comment.date}</div>${comment.text}</div>`)
+    .join("");
+  detailsContainer.innerHTML = `
+    <h4>Dados do Produto Selecionado</h4>
+    <p><strong>Nome:</strong> ${selectedProduct.name}</p>
+    <p><strong>Perímetro:</strong> ${selectedProduct.perimeter}</p>
+    <p><strong>Corte do Perímetro:</strong> ${selectedProduct.cut}</p>
+    <h5>Comentários:</h5>
+    ${commentsHtml}
+  `;
+}
 
-      localStorage.setItem("products", JSON.stringify(updatedProducts));
-      loadProducts();
-      document.getElementById("selectedProductDetails").innerHTML = "";
+function removeSelectedProduct() {
+  var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
+  if (!selectedProduct) {
+    alert("Nenhum produto selecionado.");
+    return;
+  }
 
-      var removeFeedback = document.getElementById("removeFeedback");
-      removeFeedback.style.display = "block";
-      setTimeout(function() {
-        removeFeedback.style.display = "none";
-      }, 3000);
-    }
-  </script>
+  var products = JSON.parse(localStorage.getItem("products")) || [];
+  var updatedProducts = products.filter(function(product) {
+    return JSON.stringify(product) !== document.getElementById("productSelect").value;
+  });
+
+  localStorage.setItem("products", JSON.stringify(updatedProducts));
+  loadProducts();
+  document.getElementById("selectedProductDetails").innerHTML = "";
+
+  var removeFeedback = document.getElementById("removeFeedback");
+  removeFeedback.style.display = "block";
+  setTimeout(function() {
+    removeFeedback.style.display = "none";
+  }, 3000);
+}
+
+
+
+</script>
 </body>
 </html>
