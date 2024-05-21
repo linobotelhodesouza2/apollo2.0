@@ -94,6 +94,18 @@
       background-color: #f8d7da;
       color: #721c24;
     }
+
+    .comment {
+      background-color: #e9ecef;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .comment-date {
+      font-size: 0.8em;
+      color: #6c757d;
+    }
   </style>
 </head>
 <body>
@@ -168,10 +180,20 @@
         return product.name === productName && product.perimeter === parseFloat(productPerimeter);
       });
 
+      var newComment = { text: productComments, date: new Date() };
+      
       if (existingProductIndex !== -1) {
-        products[existingProductIndex] = { name: productName, perimeter: parseFloat(productPerimeter), cut: parseFloat(productCut), comments: productComments, created_at: new Date() };
+        var product = products[existingProductIndex];
+        product.cut = parseFloat(productCut);
+        product.comments.push(newComment);
       } else {
-        products.push({ name: productName, perimeter: parseFloat(productPerimeter), cut: parseFloat(productCut), comments: productComments, created_at: new Date() });
+        products.push({
+          name: productName,
+          perimeter: parseFloat(productPerimeter),
+          cut: parseFloat(productCut),
+          comments: [newComment],
+          created_at: new Date()
+        });
       }
 
       localStorage.setItem("products", JSON.stringify(products));
@@ -217,12 +239,17 @@
     function showSelectedProduct() {
       var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
       var detailsContainer = document.getElementById("selectedProductDetails");
+      var commentsHtml = selectedProduct.comments
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .map(comment => `<div class="comment"><div class="comment-date">${new Date(comment.date).toLocaleString()}</div>${comment.text}</div>`)
+        .join("");
       detailsContainer.innerHTML = `
         <h4>Dados do Produto Selecionado</h4>
         <p><strong>Nome:</strong> ${selectedProduct.name}</p>
         <p><strong>Perímetro:</strong> ${selectedProduct.perimeter}</p>
         <p><strong>Corte do Perímetro:</strong> ${selectedProduct.cut}</p>
-        <p><strong>Comentários:</strong> ${selectedProduct.comments}</p>
+        <h5>Comentários:</h5>
+        ${commentsHtml}
       `;
     }
 
