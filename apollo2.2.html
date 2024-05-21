@@ -71,6 +71,16 @@
       border-color: #bd2130;
     }
 
+    .btn-secondary {
+      background-color: #6c757d;
+      border-color: #6c757d;
+    }
+
+    .btn-secondary:hover {
+      background-color: #5a6268;
+      border-color: #545b62;
+    }
+
     #selectedProductDetails {
       background-color: #f8f9fa;
       border-radius: 8px;
@@ -93,6 +103,23 @@
     .feedback-error {
       background-color: #f8d7da;
       color: #721c24;
+    }
+
+    .comment-list {
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    .comment-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0;
+    }
+
+    .comment-date {
+      font-size: 0.9em;
+      color: #6c757d;
     }
   </style>
 </head>
@@ -232,14 +259,20 @@
     function showSelectedProduct() {
       var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
       var detailsContainer = document.getElementById("selectedProductDetails");
-      var commentsHtml = selectedProduct.comments.map(comment => `<li>${comment.date}: ${comment.text}</li>`).join('');
+      var commentsHtml = selectedProduct.comments.map((comment, index) => `
+        <li>
+          <span class="comment-date">${comment.date}</span>:
+          <span>${comment.text}</span>
+          <button class="btn btn-secondary btn-sm" onclick="removeComment(${index})">Remover</button>
+        </li>
+      `).join('');
       detailsContainer.innerHTML = `
         <h4>Dados do Produto Selecionado</h4>
         <p><strong>Nome:</strong> ${selectedProduct.name}</p>
         <p><strong>Perímetro:</strong> ${selectedProduct.perimeter}</p>
         <p><strong>Corte do Perímetro:</strong> ${selectedProduct.cut}</p>
         <p><strong>Comentários:</strong></p>
-        <ul>${commentsHtml}</ul>
+        <ul class="comment-list">${commentsHtml}</ul>
       `;
     }
 
@@ -264,6 +297,25 @@
       setTimeout(function() {
         removeFeedback.style.display = "none";
       }, 3000);
+    }
+
+    function removeComment(commentIndex) {
+      var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
+      if (!selectedProduct) {
+        alert("Nenhum produto selecionado.");
+        return;
+      }
+
+      selectedProduct.comments.splice(commentIndex, 1);
+
+      var products = JSON.parse(localStorage.getItem("products")) || [];
+      var productIndex = products.findIndex(product => product.name === selectedProduct.name && product.perimeter === selectedProduct.perimeter);
+
+      if (productIndex !== -1) {
+        products[productIndex] = selectedProduct;
+        localStorage.setItem("products", JSON.stringify(products));
+        showSelectedProduct();
+      }
     }
   </script>
 </body>
