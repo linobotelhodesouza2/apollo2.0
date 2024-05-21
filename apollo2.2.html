@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -71,21 +72,11 @@
       border-color: #bd2130;
     }
 
-    .comment {
-      margin-bottom: 10px;
-      padding: 10px;
-      border-radius: 8px;
+    #selectedProductDetails {
       background-color: #f8f9fa;
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-    }
-
-    .comment p {
-      margin: 0;
-    }
-
-    .comment-date {
-      font-size: 12px;
-      color: #666;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
     .feedback {
@@ -132,7 +123,7 @@
   </div>
 
   <div class="container mt-5">
-    <h2>Histórico de Produtos</h2>
+    <h2>Histórico de Perímetros</h2>
     <div class="form-group">
       <label for="productSelect">Selecionar Produto:</label>
       <select class="form-control" id="productSelect" onchange="showSelectedProduct()">
@@ -145,7 +136,6 @@
 
   <div class="container mt-3">
     <div id="selectedProductDetails"></div>
-    <div id="commentsContainer"></div>
   </div>
 
   <script>
@@ -158,7 +148,6 @@
       var productPerimeter = document.getElementById("productPerimeter").value.trim();
       var productCut = document.getElementById("productCut").value.trim();
       var productComments = document.getElementById("productComments").value.trim();
-      var commentDate = new Date().toLocaleString();
 
       if (productName === "") {
         alert("Por favor, insira o nome do produto.");
@@ -181,21 +170,17 @@
       });
 
       if (existingProductIndex !== -1) {
-        products[existingProductIndex].cut = parseFloat(productCut);
-        products[existingProductIndex].comments.push({ text: productComments, date: commentDate });
+        // Se o produto já existe, adicione o novo comentário à lista de comentários
+        products[existingProductIndex].comments.push(productComments);
       } else {
-        products.push({ 
-          name: productName, 
-          perimeter: parseFloat(productPerimeter), 
-          cut: parseFloat(productCut), 
-          comments: [{ text: productComments, date: commentDate }],
-          created_at: new Date() 
-        });
+        // Se não, adicione o novo produto com os comentários em uma lista
+        products.push({ name: productName, perimeter: parseFloat(productPerimeter), cut: parseFloat(productCut), comments: [productComments], created_at: new Date() });
       }
 
       localStorage.setItem("products", JSON.stringify(products));
       loadProducts();
 
+      // Limpar os campos após salvar
       document.getElementById("productName").value = "";
       document.getElementById("productPerimeter").value = "";
       document.getElementById("productCut").value = "";
@@ -236,32 +221,15 @@
     function showSelectedProduct() {
       var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
       var detailsContainer = document.getElementById("selectedProductDetails");
-      var commentsContainer = document.getElementById("commentsContainer");
-
-      if (!selectedProduct) {
-        detailsContainer.innerHTML = "";
-        commentsContainer.innerHTML = "";
-        return;
-      }
-
+      var commentsHtml = selectedProduct.comments.map(comment => `<li>${comment}</li>`).join('');
       detailsContainer.innerHTML = `
         <h4>Dados do Produto Selecionado</h4>
         <p><strong>Nome:</strong> ${selectedProduct.name}</p>
         <p><strong>Perímetro:</strong> ${selectedProduct.perimeter}</p>
         <p><strong>Corte do Perímetro:</strong> ${selectedProduct.cut}</p>
+        <p><strong>Comentários:</strong></p>
+        <ul>${commentsHtml}</ul>
       `;
-
-      commentsContainer.innerHTML = "<h4>Comentários</h4>";
-
-      selectedProduct.comments.forEach(function(comment) {
-        var commentDiv = document.createElement("div");
-        commentDiv.classList.add("comment");
-        commentDiv.innerHTML = `
-          <p>${comment.text}</p>
-          <p class="comment-date">${comment.date}</p>
-        `;
-        commentsContainer.insertBefore(commentDiv, commentsContainer.firstChild);
-      });
     }
 
     function removeSelectedProduct() {
@@ -279,7 +247,6 @@
       localStorage.setItem("products", JSON.stringify(updatedProducts));
       loadProducts();
       document.getElementById("selectedProductDetails").innerHTML = "";
-      document.getElementById("commentsContainer").innerHTML = "";
 
       var removeFeedback = document.getElementById("removeFeedback");
       removeFeedback.style.display = "block";
