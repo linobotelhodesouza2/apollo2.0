@@ -168,15 +168,29 @@
         return product.name === productName && product.perimeter === parseFloat(productPerimeter);
       });
 
+      var comment = {
+        text: productComments,
+        date: new Date().toLocaleString()
+      };
+
       if (existingProductIndex !== -1) {
-        products[existingProductIndex] = { name: productName, perimeter: parseFloat(productPerimeter), cut: parseFloat(productCut), comments: productComments, created_at: new Date() };
+        // Se o produto já existe, adicione o novo comentário à lista de comentários
+        products[existingProductIndex].comments.push(comment);
       } else {
-        products.push({ name: productName, perimeter: parseFloat(productPerimeter), cut: parseFloat(productCut), comments: productComments, created_at: new Date() });
+        // Se não, adicione o novo produto com os comentários em uma lista
+        products.push({
+          name: productName,
+          perimeter: parseFloat(productPerimeter),
+          cut: parseFloat(productCut),
+          comments: [comment],
+          created_at: new Date()
+        });
       }
 
       localStorage.setItem("products", JSON.stringify(products));
       loadProducts();
 
+      // Limpar os campos após salvar
       document.getElementById("productName").value = "";
       document.getElementById("productPerimeter").value = "";
       document.getElementById("productCut").value = "";
@@ -217,12 +231,14 @@
     function showSelectedProduct() {
       var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
       var detailsContainer = document.getElementById("selectedProductDetails");
+      var commentsHtml = selectedProduct.comments.map(comment => `<li>${comment.date}: ${comment.text}</li>`).join('');
       detailsContainer.innerHTML = `
         <h4>Dados do Produto Selecionado</h4>
         <p><strong>Nome:</strong> ${selectedProduct.name}</p>
         <p><strong>Perímetro:</strong> ${selectedProduct.perimeter}</p>
         <p><strong>Corte do Perímetro:</strong> ${selectedProduct.cut}</p>
-        <p><strong>Comentários:</strong> ${selectedProduct.comments}</p>
+        <p><strong>Comentários:</strong></p>
+        <ul>${commentsHtml}</ul>
       `;
     }
 
