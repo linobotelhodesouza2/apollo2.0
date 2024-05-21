@@ -180,12 +180,12 @@
         return;
       }
 
-      if (isNaN(productPerimeter)) {
+      if (isNaN(productPerimeter) || productPerimeter === "") {
         alert("O perímetro do produto deve ser um número.");
         return;
       }
 
-      if (isNaN(productCut)) {
+      if (isNaN(productCut) || productCut === "") {
         alert("O corte do perímetro deve ser um número.");
         return;
       }
@@ -202,7 +202,9 @@
 
       if (existingProductIndex !== -1) {
         // Se o produto já existe, adicione o novo comentário à lista de comentários
-        products[existingProductIndex].comments = products[existingProductIndex].comments || [];
+        if (!products[existingProductIndex].comments) {
+          products[existingProductIndex].comments = [];
+        }
         products[existingProductIndex].comments.push(comment);
       } else {
         // Se não, adicione o novo produto com os comentários em uma lista
@@ -211,7 +213,7 @@
           perimeter: parseFloat(productPerimeter),
           cut: parseFloat(productCut),
           comments: [comment],
-          created_at: new Date()
+          created_at: new Date().toLocaleString()
         });
       }
 
@@ -259,6 +261,10 @@
     function showSelectedProduct() {
       var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
       var detailsContainer = document.getElementById("selectedProductDetails");
+      if (!selectedProduct) {
+        detailsContainer.innerHTML = '';
+        return;
+      }
       var commentsHtml = selectedProduct.comments.map((comment, index) => `
         <li>
           <span class="comment-date">${comment.date}</span>:
@@ -306,13 +312,11 @@
         return;
       }
 
-      selectedProduct.comments.splice(commentIndex, 1);
-
       var products = JSON.parse(localStorage.getItem("products")) || [];
       var productIndex = products.findIndex(product => product.name === selectedProduct.name && product.perimeter === selectedProduct.perimeter);
 
       if (productIndex !== -1) {
-        products[productIndex] = selectedProduct;
+        products[productIndex].comments.splice(commentIndex, 1);
         localStorage.setItem("products", JSON.stringify(products));
         showSelectedProduct();
       }
