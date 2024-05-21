@@ -99,20 +99,11 @@
       });
 
       if (existingProductIndex !== -1) {
-        // Se o produto já existe, substitua-o e preserve os comentários antigos
-        var existingProduct = products[existingProductIndex];
-        var comments = existingProduct.comments || [];
-        if (productComments) {
-          comments.push({ text: productComments, date: new Date() });
-        }
-        products[existingProductIndex] = { name: productName, perimeter: parseFloat(productPerimeter), cut: parseFloat(productCut), comments: comments, created_at: new Date() };
+        // Se o produto já existe, substitua-o
+        products[existingProductIndex] = { name: productName, perimeter: parseFloat(productPerimeter), cut: parseFloat(productCut), comments: productComments, created_at: new Date() };
       } else {
         // Se não, adicione o novo produto
-        var comments = [];
-        if (productComments) {
-          comments.push({ text: productComments, date: new Date() });
-        }
-        products.push({ name: productName, perimeter: parseFloat(productPerimeter), cut: parseFloat(productCut), comments: comments, created_at: new Date() });
+        products.push({ name: productName, perimeter: parseFloat(productPerimeter), cut: parseFloat(productCut), comments: productComments, created_at: new Date() });
       }
 
       localStorage.setItem("products", JSON.stringify(products));
@@ -155,21 +146,12 @@
     function showSelectedProduct() {
       var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
       var detailsContainer = document.getElementById("selectedProductDetails");
-      if (!selectedProduct) {
-        detailsContainer.innerHTML = "";
-        return;
-      }
       detailsContainer.innerHTML = `
         <h4>Dados do Produto Selecionado</h4>
         <p><strong>Nome:</strong> ${selectedProduct.name}</p>
         <p><strong>Perímetro:</strong> ${selectedProduct.perimeter}</p>
         <p><strong>Corte do Perímetro:</strong> ${selectedProduct.cut}</p>
-        <h5>Comentários:</h5>
-        <ul id="commentsList">
-          ${selectedProduct.comments.map(comment => `
-            <li>${comment.text} (em ${new Date(comment.date).toLocaleString()})</li>
-          `).join('')}
-        </ul>
+        <p><strong>Comentários:</strong> ${selectedProduct.comments}</p>
       `;
     }
 
