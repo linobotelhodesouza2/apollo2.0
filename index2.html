@@ -11,23 +11,26 @@
       background-size: cover;
       position: relative;
     }
+
     .overlay {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(255, 255, 255, 0.8);
+      background-color: rgba(255, 255, 255, 0.8); /* Opacidade de 80% */
     }
+
     .container {
       margin-top: 20px;
       position: relative;
-      z-index: 1;
+      z-index: 1; /* Garante que o conteúdo da página fique na frente do fundo abstrato */
     }
   </style>
 </head>
 <body>
   <div class="overlay"></div>
+
   <div class="container">
     <h2>Cadastro de Produtos</h2>
     <div class="form-group">
@@ -43,11 +46,12 @@
       <input type="number" class="form-control" id="productCut" step="any">
     </div>
     <div class="form-group">
-      <label for="productComment">Novo Comentário (até 200 caracteres):</label>
-      <input type="text" class="form-control" id="productComment" maxlength="200">
+      <label for="productComments">Comentários (até 200 caracteres):</label>
+      <input type="text" class="form-control" id="productComments" maxlength="200">
     </div>
     <button type="button" class="btn btn-primary" onclick="saveProduct()">Salvar</button>
   </div>
+
   <div class="container mt-5">
     <h2>Histórico de Perímetros</h2>
     <div class="form-group">
@@ -58,9 +62,11 @@
     </div>
     <button type="button" class="btn btn-danger" onclick="removeSelectedProduct()">Remover</button>
   </div>
+
   <div class="container mt-3">
     <div id="selectedProductDetails"></div>
   </div>
+
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       loadProducts();
@@ -70,7 +76,7 @@
       var productName = document.getElementById("productName").value.trim().toUpperCase();
       var productPerimeter = document.getElementById("productPerimeter").value.trim();
       var productCut = document.getElementById("productCut").value.trim();
-      var productComment = document.getElementById("productComment").value.trim();
+      var productComments = document.getElementById("productComments").value.trim();
 
       if (productName === "") {
         alert("Por favor, insira o nome do produto.");
@@ -93,31 +99,21 @@
       });
 
       if (existingProductIndex !== -1) {
-        var existingProduct = products[existingProductIndex];
-        if (productComment !== "") {
-          existingProduct.comments.push({ text: productComment, date: new Date() });
-        }
-        existingProduct.cut = parseFloat(productCut);
+        // Se o produto já existe, substitua-o
+        products[existingProductIndex] = { name: productName, perimeter: parseFloat(productPerimeter), cut: parseFloat(productCut), comments: productComments, created_at: new Date() };
       } else {
-        var newProduct = {
-          name: productName,
-          perimeter: parseFloat(productPerimeter),
-          cut: parseFloat(productCut),
-          comments: []
-        };
-        if (productComment !== "") {
-          newProduct.comments.push({ text: productComment, date: new Date() });
-        }
-        products.push(newProduct);
+        // Se não, adicione o novo produto
+        products.push({ name: productName, perimeter: parseFloat(productPerimeter), cut: parseFloat(productCut), comments: productComments, created_at: new Date() });
       }
 
       localStorage.setItem("products", JSON.stringify(products));
       loadProducts();
 
+      // Limpar os campos após salvar
       document.getElementById("productName").value = "";
       document.getElementById("productPerimeter").value = "";
       document.getElementById("productCut").value = "";
-      document.getElementById("productComment").value = "";
+      document.getElementById("productComments").value = "";
 
       alert("Produto salvo com sucesso!");
     }
@@ -150,19 +146,12 @@
     function showSelectedProduct() {
       var selectedProduct = JSON.parse(document.getElementById("productSelect").value);
       var detailsContainer = document.getElementById("selectedProductDetails");
-
-      var commentsHtml = selectedProduct.comments.map(function(comment) {
-        var date = new Date(comment.date);
-        return `<li>${comment.text} (Data: ${date.toLocaleDateString()} ${date.toLocaleTimeString()})</li>`;
-      }).join("");
-
       detailsContainer.innerHTML = `
         <h4>Dados do Produto Selecionado</h4>
         <p><strong>Nome:</strong> ${selectedProduct.name}</p>
         <p><strong>Perímetro:</strong> ${selectedProduct.perimeter}</p>
         <p><strong>Corte do Perímetro:</strong> ${selectedProduct.cut}</p>
-        <p><strong>Comentários:</strong></p>
-        <ul>${commentsHtml}</ul>
+        <p><strong>Comentários:</strong> ${selectedProduct.comments}</p>
       `;
     }
 
