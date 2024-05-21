@@ -99,8 +99,9 @@
       });
 
       if (existingProductIndex !== -1) {
-        // Se o produto já existe, substitua-o
-        products[existingProductIndex] = { name: productName, perimeter: parseFloat(productPerimeter), cut: parseFloat(productCut), comments: productComments, created_at: new Date() };
+        // Se o produto já existe, mantenha a data de criação e os comentários antigos
+        products[existingProductIndex].cut = parseFloat(productCut);
+        products[existingProductIndex].comments = productComments || products[existingProductIndex].comments;
       } else {
         // Se não, adicione o novo produto
         products.push({ name: productName, perimeter: parseFloat(productPerimeter), cut: parseFloat(productCut), comments: productComments, created_at: new Date() });
@@ -152,6 +153,7 @@
         <p><strong>Perímetro:</strong> ${selectedProduct.perimeter}</p>
         <p><strong>Corte do Perímetro:</strong> ${selectedProduct.cut}</p>
         <p><strong>Comentários:</strong> ${selectedProduct.comments}</p>
+        <p><strong>Data de Inserção:</strong> ${new Date(selectedProduct.created_at).toLocaleString()}</p>
       `;
     }
 
